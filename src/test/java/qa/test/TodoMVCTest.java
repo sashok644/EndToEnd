@@ -121,14 +121,12 @@ public class TodoMVCTest {
     @Test
     public void testReopenAllTaskAtCompleted() {
 
-        //given - task on completed filter
+        //given - tasks on completed filter
         add("A", "B", "C");
-        assertTasks("A", "B", "C");
         toggleAll();
         filterCompleted();
         assertVisibleTasks("A", "B", "C");
 
-        // reopenAll
         toggleAll();
         assertNoVisibleTasks();
         assertItemsLeft(3);
