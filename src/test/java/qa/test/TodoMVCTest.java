@@ -1,49 +1,21 @@
 package qa.test;
 
 import com.codeborne.selenide.ElementsCollection;
-import com.codeborne.selenide.Screenshots;
 import com.codeborne.selenide.SelenideElement;
-import com.google.common.io.Files;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import ru.yandex.qatools.allure.annotations.Attachment;
 import ru.yandex.qatools.allure.annotations.Step;
-
-import java.io.File;
-import java.io.IOException;
 
 import static com.codeborne.selenide.CollectionCondition.empty;
 import static com.codeborne.selenide.CollectionCondition.exactTexts;
 import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.$$;
 
 /**
  * Created by 64 on 24.02.2016.
  */
-public class TodoMVCTest {
-
-    @After
-    public void tearDown() throws IOException {
-        screenshot();
-    }
-
-    @Attachment(type = "image/png")
-    public byte[] screenshot() throws IOException {
-        File screenshot = Screenshots.getLastScreenshot();
-        return Files.toByteArray(screenshot);
-    }
-
-    @Before
-    public void openPage() {
-        open("https://todomvc4tasj.herokuapp.com/");
-    }
-
-    @After
-    public void clearData() {
-        executeJavaScript("localStorage.clear()");
-    }
+public class TodoMVCTest extends AtTodoMVCPageWithClearedDataAfterEachTest {
 
     @Test
     public void testTaskMainFlow() {
