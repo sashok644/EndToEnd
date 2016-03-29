@@ -12,7 +12,6 @@ import static com.codeborne.selenide.CollectionCondition.exactTexts;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
 import static qa.test.TodoMVCTest.TaskType.ACTIVE;
-import static qa.test.TodoMVCTest.TaskType.COMPLETED;
 
 
 /**
@@ -25,7 +24,7 @@ public class TodoMVCTest extends BaseTest {
     public void testTaskMainFlow() {
         Configuration.holdBrowserOpen = true;
         open(ALL);
-        given(ACTIVE, "A");
+        given(ACTIVE, "A", "B");
 //        startEdit("A", "A edited").pressEnter();
         // setCompleted
 //        toggle("A edited");rr
@@ -54,7 +53,7 @@ public class TodoMVCTest extends BaseTest {
 
     }
 
-    //    @Test
+ /*   //    @Test
     public void testEditByClickOutsideAtAll() {
 
         //given - task on all filter
@@ -103,21 +102,24 @@ public class TodoMVCTest extends BaseTest {
         assertNoVisibleTasks();
         assertItemsLeft(3);
     }
-
+*/
 
     ElementsCollection tasks = $$("#todo-list>li");
 
 
     public enum TaskType {
-
         ACTIVE, COMPLETED
-
     }
 
+    public enum Filter {
 
-    final String ALL = "http://todomvc4tasj.herokuapp.com/#/";
-    final String ACTIVEFILTER = "http://todomvc4tasj.herokuapp.com/#/active";
-    final String COMPLETEDFILTER = "http://todomvc4tasj.herokuapp.com/#/completed";
+        String all="http://todomvc4tasj.herokuapp.com/#/";
+        String activeFilter = "http://todomvc4tasj.herokuapp.com/#/active";
+        String completedFilter = "http://todomvc4tasj.herokuapp.com/#/completed";
+
+        }
+
+
 
 
     public class Task {
@@ -140,6 +142,7 @@ public class TodoMVCTest extends BaseTest {
     public void given(Task... tasks) {
 
         String result = "{\\\"completed\\\":";
+
         for (Task task : tasks) {
             result = result + (task.taskType == ACTIVE ? "false" : "true") + ", \\\"title\\\":\\\"" + task.taskText + "\\\"},";
 
@@ -154,29 +157,6 @@ public class TodoMVCTest extends BaseTest {
         executeJavaScript("location.reload()");
 
     }
-
-    public void given(Task taskType, String... taskTexts) {
-        String result = "{\\\"completed\\\":";
-        for (String tasks : taskTexts) {
-            if (taskType == ACTIVE) {
-                result = result + "false" + ", \\\"title\\\":\\\"" + tasks + "\\\"},";
-            } else
-                result = result + "true" + ", \\\"title\\\":\\\"" + tasks + "\\\"},";
-
-            }
-        if (taskTexts.length > 0) {
-            result = result.substring(0, result.length() - 1);
-            }
-
-        String JS = "localStorage.setItem(\"todos-troopjs\", \"[" + result + "]\")";
-
-        executeJavaScript(JS);
-        executeJavaScript("location.reload()");
-
-        }
-
-
-
 
 
     @Step
