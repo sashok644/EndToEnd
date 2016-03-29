@@ -113,6 +113,17 @@ public class TodoMVCTest extends BaseTest {
 
     public enum Filter {
 
+        public filter;
+
+        public String getFilter() {
+            return filter;
+        }
+
+        public void setFilter(Filter filter) {
+            this.filter = filter;
+        }
+
+
         String all="http://todomvc4tasj.herokuapp.com/#/";
         String activeFilter = "http://todomvc4tasj.herokuapp.com/#/active";
         String completedFilter = "http://todomvc4tasj.herokuapp.com/#/completed";
