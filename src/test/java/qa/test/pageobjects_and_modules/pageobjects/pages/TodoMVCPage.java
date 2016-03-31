@@ -1,8 +1,7 @@
-package qa.test;
+package qa.test.pageobjects_and_modules.pageobjects.pages;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
-import org.junit.Test;
 import org.openqa.selenium.By;
 import ru.yandex.qatools.allure.annotations.Step;
 
@@ -11,94 +10,12 @@ import static com.codeborne.selenide.CollectionCondition.exactTexts;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.WebDriverRunner.url;
-import static qa.test.TodoMVCTest.TaskType.ACTIVE;
-import static qa.test.TodoMVCTest.TaskType.COMPLETED;
+import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.TaskType.*;
 
 /**
- * Created by 64 on 24.02.2016.
+ * Created by 64 on 31.03.2016.
  */
-public class TodoMVCTest extends BaseTest {
-
-
-    @Test
-    public void testTaskMainFlow() {
-
-        givenAtAll();
-        add("A");
-        startEdit("A", "A edited").pressEnter();
-        // setCompleted
-        toggle("A edited");
-        assertTasks("A edited");
-
-        filterActive();
-        assertNoVisibleTasks();
-
-        add("B");
-        assertVisibleTasks("B");
-        assertItemsLeft(1);
-        // completeAll
-        toggleAll();
-        assertNoVisibleTasks();
-
-        filterCompleted();
-        assertVisibleTasks("A edited", "B");
-        //setActive
-        toggle("A edited");
-        assertVisibleTasks("B");
-        clearCompleted();
-        assertNoVisibleTasks();
-
-        filterAll();
-        startEdit("A edited", "A").pressEscape();
-        delete("A edited");
-        assertNoTasks();
-    }
-
-    @Test
-    public void testEditByClickOutsideAtAll() {
-
-        givenAtAll(aTask(ACTIVE, "A"));
-        assertTasks("A");
-
-        startEdit("A", "A edited");
-        $("#header").click();
-        assertTasks("A edited");
-        assertItemsLeft(1);
-    }
-
-    @Test
-    public void testEditByPressTabAtActive() {
-
-        givenAtActive(aTask(ACTIVE, "A"));
-        assertVisibleTasks("A");
-
-        startEdit("A", "A edited").pressTab();
-        assertVisibleTasks("A edited");
-        assertItemsLeft(1);
-    }
-
-    @Test
-    public void testDeleteByRemovingTaskNameAtCompleted() {
-
-        givenAtCompleted(aTask(COMPLETED, "A"));
-        assertVisibleTasks("A");
-
-        startEdit("A", "").pressEnter();
-        assertNoVisibleTasks();
-    }
-
-    @Test
-    public void testReopenAllTaskAtCompleted() {
-
-        givenAtCompleted(COMPLETED, "A", "B", "C");
-        toggleAll();
-        filterCompleted();
-        assertVisibleTasks("A", "B", "C");
-
-        toggleAll();
-        assertNoVisibleTasks();
-        assertItemsLeft(3);
-    }
+public class TodoMVCPage {
 
     ElementsCollection tasks = $$("#todo-list>li");
 
@@ -218,77 +135,76 @@ public class TodoMVCTest extends BaseTest {
     }
 
     @Step
-    private void assertItemsLeft(Integer count) {
+    public void assertItemsLeft(Integer count) {
         $("#todo-count>strong").shouldHave(exactText(String.valueOf(count)));
     }
 
     @Step
-    private void toggleAll() {
+    public void toggleAll() {
         $("#toggle-all").click();
     }
 
     @Step
-    private SelenideElement startEdit(String oldTaskText, String newTaskText) {
+    public SelenideElement startEdit(String oldTaskText, String newTaskText) {
         tasks.find(exactText(oldTaskText)).doubleClick();
         return tasks.find(cssClass("editing")).find(".edit").val(newTaskText);
     }
 
     @Step
-    private void filterAll() {
+    public void filterAll() {
         $(By.linkText("All")).click();
     }
 
     @Step
-    private void filterActive() {
+    public void filterActive() {
         $(By.linkText("Active")).click();
     }
 
     @Step
-    private void filterCompleted() {
+    public void filterCompleted() {
         $(By.linkText("Completed")).click();
     }
 
     @Step
-    private void toggle(String taskText) {
+    public void toggle(String taskText) {
         tasks.find(exactText(taskText)).find(".toggle").click();
     }
 
     @Step
-    private void clearCompleted() {
+    public void clearCompleted() {
         $("#clear-completed").click();
         $("#clear-completed").shouldNotBe(visible);
     }
 
     @Step
-    private void delete(String taskText) {
+    public void delete(String taskText) {
         tasks.find(exactText(taskText)).hover().$(".destroy").click();
     }
 
     @Step
-    private void add(String... taskTexts) {
+    public void add(String... taskTexts) {
         for (String text : taskTexts) {
             $("#new-todo").setValue(text).pressEnter();
         }
     }
 
     @Step
-    private void assertTasks(String... taskTexts) {
+    public void assertTasks(String... taskTexts) {
         tasks.shouldHave(exactTexts(taskTexts));
     }
 
     @Step
-    private void assertNoTasks() {
+    public void assertNoTasks() {
         tasks.shouldBe(empty);
     }
 
     @Step
-    private void assertVisibleTasks(String... taskTexts) {
+    public void assertVisibleTasks(String... taskTexts) {
         tasks.filter(visible).shouldHave(exactTexts(taskTexts));
     }
 
     @Step
-    private void assertNoVisibleTasks() {
+    public void assertNoVisibleTasks() {
         tasks.filter(visible).shouldBe(empty);
     }
-
 }
