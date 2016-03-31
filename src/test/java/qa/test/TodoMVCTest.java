@@ -1,6 +1,5 @@
 package qa.test;
 
-import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import org.junit.Test;
@@ -11,8 +10,9 @@ import static com.codeborne.selenide.CollectionCondition.empty;
 import static com.codeborne.selenide.CollectionCondition.exactTexts;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.WebDriverRunner.url;
 import static qa.test.TodoMVCTest.TaskType.ACTIVE;
-
+import static qa.test.TodoMVCTest.TaskType.COMPLETED;
 
 /**
  * Created by 64 on 24.02.2016.
@@ -22,43 +22,43 @@ public class TodoMVCTest extends BaseTest {
 
     @Test
     public void testTaskMainFlow() {
-        Configuration.holdBrowserOpen = true;
-        open(ALL);
-        given(ACTIVE, "A", "B");
-//        startEdit("A", "A edited").pressEnter();
+
+        givenAtAll();
+        add("A");
+        startEdit("A", "A edited").pressEnter();
         // setCompleted
-//        toggle("A edited");rr
-//        assertTasks("A edited", "B");
+        toggle("A edited");
+        assertTasks("A edited");
 
-//        open(ACTIVEFILTER);
-//
-//        assertVisibleTasks("B");
-//        assertItemsLeft(1);
-//        // completeAll
-//        toggleAll();
-//        assertNoVisibleTasks();
-//
-//        filterCompleted();
-//        assertVisibleTasks("A edited", "B");
-//        //setActive
-//        toggle("A edited");
-//        assertVisibleTasks("B");
-//        clearCompleted();
-//        assertNoVisibleTasks();
-//
-//        filterAll();
-//        startEdit("A edited", "A").pressEscape();
-//        delete("A edited");
-//        assertNoTasks();
+        filterActive();
+        assertNoVisibleTasks();
 
+        add("B");
+        assertVisibleTasks("B");
+        assertItemsLeft(1);
+        // completeAll
+        toggleAll();
+        assertNoVisibleTasks();
+
+        filterCompleted();
+        assertVisibleTasks("A edited", "B");
+        //setActive
+        toggle("A edited");
+        assertVisibleTasks("B");
+        clearCompleted();
+        assertNoVisibleTasks();
+
+        filterAll();
+        startEdit("A edited", "A").pressEscape();
+        delete("A edited");
+        assertNoTasks();
     }
 
- /*   //    @Test
+    @Test
     public void testEditByClickOutsideAtAll() {
 
-        //given - task on all filter
-        open(ALL);
-        //   given(aTask(ACTIVE, "A"));
+        givenAtAll(aTask(ACTIVE, "A"));
+        assertTasks("A");
 
         startEdit("A", "A edited");
         $("#header").click();
@@ -66,43 +66,39 @@ public class TodoMVCTest extends BaseTest {
         assertItemsLeft(1);
     }
 
-    //    @Test
+    @Test
     public void testEditByPressTabAtActive() {
 
-        //given - task on active filter
-        open(COMPLETEDFILTER);
-//        givenAllCompleted("A");
+        givenAtActive(aTask(ACTIVE, "A"));
+        assertVisibleTasks("A");
 
         startEdit("A", "A edited").pressTab();
         assertVisibleTasks("A edited");
-        assertItemsLeft(0);
+        assertItemsLeft(1);
     }
 
-    //    @Test
+    @Test
     public void testDeleteByRemovingTaskNameAtCompleted() {
 
-        //given - task on completed filter
-        open(COMPLETEDFILTER);
-//        givenAllCompleted("A");
+        givenAtCompleted(aTask(COMPLETED, "A"));
         assertVisibleTasks("A");
 
         startEdit("A", "").pressEnter();
         assertNoVisibleTasks();
     }
 
-    //    @Test
+    @Test
     public void testReopenAllTaskAtCompleted() {
 
-        //given - tasks on completed filter
-        open(COMPLETEDFILTER);
-//        givenAllCompleted("A", "B", "C");
+        givenAtCompleted(COMPLETED, "A", "B", "C");
+        toggleAll();
+        filterCompleted();
         assertVisibleTasks("A", "B", "C");
 
         toggleAll();
         assertNoVisibleTasks();
         assertItemsLeft(3);
     }
-*/
 
     ElementsCollection tasks = $$("#todo-list>li");
 
@@ -113,24 +109,21 @@ public class TodoMVCTest extends BaseTest {
 
     public enum Filter {
 
-        public filter;
+        ALL("http://todomvc4tasj.herokuapp.com/#/"),
+        ACTIVE("http://todomvc4tasj.herokuapp.com/#/active"),
+        COMPLETED("http://todomvc4tasj.herokuapp.com/#/completed");
 
-        public String getFilter() {
-            return filter;
+        private String url;
+
+        Filter(String url) {
+            this.url = url;
         }
 
-        public void setFilter(Filter filter) {
-            this.filter = filter;
+        public String getURL() {
+            return url;
         }
 
-
-        String all="http://todomvc4tasj.herokuapp.com/#/";
-        String activeFilter = "http://todomvc4tasj.herokuapp.com/#/active";
-        String completedFilter = "http://todomvc4tasj.herokuapp.com/#/completed";
-
-        }
-
-
+    }
 
 
     public class Task {
@@ -149,13 +142,18 @@ public class TodoMVCTest extends BaseTest {
         return task;
     }
 
+    public void ensurePageOpened(Filter filter) {
+        if (!url().equals(filter.getURL())) {
+            open(filter.getURL());
+        }
+    }
 
     public void given(Task... tasks) {
-
-        String result = "{\\\"completed\\\":";
+        String result = "";
 
         for (Task task : tasks) {
-            result = result + (task.taskType == ACTIVE ? "false" : "true") + ", \\\"title\\\":\\\"" + task.taskText + "\\\"},";
+            result = result + "{\\\"completed\\\":" + (task.taskType == ACTIVE ? "false" : "true") +
+                    ", \\\"title\\\":\\\"" + task.taskText + "\\\"},";
 
         }
         if (tasks.length > 0) {
@@ -169,6 +167,55 @@ public class TodoMVCTest extends BaseTest {
 
     }
 
+    public void given(TaskType taskType, String... taskText) {
+
+        String result = "";
+
+        for (int i = 0; i < taskText.length; i++) {
+            result = result + "{\\\"completed\\\":" + (taskType == ACTIVE ? "false" : "true") + ", \\\"title\\\":\\\"" + taskText[i] + "\\\"},";
+        }
+        if (taskText.length > 0) {
+            result = result.substring(0, result.length() - 1);
+        }
+        String JS = "localStorage.setItem(\"todos-troopjs\", \"[" + result + "]\")";
+
+        executeJavaScript(JS);
+        executeJavaScript("location.reload()");
+    }
+
+    public void givenAtAll(Task... tasks) {
+        ensurePageOpened(Filter.ALL);
+        given(tasks);
+    }
+
+    public void givenAtActive(Task... tasks) {
+        ensurePageOpened(Filter.ACTIVE);
+        given(tasks);
+    }
+
+    public void givenAtCompleted(Task... tasks) {
+        ensurePageOpened(Filter.COMPLETED);
+        given(tasks);
+    }
+
+
+    public void givenAtAll(TaskType taskType, String... taskTexts) {
+        ensurePageOpened(Filter.ALL);
+        given(taskType, taskTexts);
+
+    }
+
+    public void givenAtActive(TaskType taskType, String... taskTexts) {
+        ensurePageOpened(Filter.ACTIVE);
+        given(taskType, taskTexts);
+
+    }
+
+    public void givenAtCompleted(TaskType taskType, String... taskTexts) {
+        ensurePageOpened(Filter.COMPLETED);
+        given(taskType, taskTexts);
+
+    }
 
     @Step
     private void assertItemsLeft(Integer count) {
