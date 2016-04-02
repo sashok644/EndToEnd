@@ -4,6 +4,10 @@ import org.junit.Test;
 import qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage;
 
 import static com.codeborne.selenide.Selenide.$;
+import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.Task.*;
+import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.TaskType.*;
+
+
 
 
 /**
@@ -13,7 +17,6 @@ public class TodoMVCTest extends BaseTest {
 
     TodoMVCPage page = new TodoMVCPage();
 
-    @Test
     public void testTaskMainFlow() {
 
         page.givenAtAll();
@@ -48,14 +51,112 @@ public class TodoMVCTest extends BaseTest {
     }
 
     @Test
+    public void testCompleteAllAtAll() {
+        page.givenAtAll(ACTIVE, "A", "B", "C", "D");
+
+        page.toggleAll();
+        page.assertTasks("A", "B", "C", "D");
+        page.assertItemsLeft(0);
+    }
+
+    @Test
+    public void testReopenAtAll() {
+
+        page.givenAtAll(aTask(COMPLETED, "A"));
+
+        page.toggle("A");
+        page.assertVisibleTasks("A");
+        page.assertItemsLeft(1);
+    }
+
+    @Test
+    public void testReopenAllAtAll() {
+
+        page.givenAtAll(COMPLETED, "A", "B", "C", "D");
+
+        page.toggleAll();
+        page.assertVisibleTasks("A", "B", "C", "D");
+        page.assertItemsLeft(4);
+    }
+
+    @Test
+    public void testClearCompletedAtAll() {
+
+        page.givenAtAll(COMPLETED, "A", "B", "C", "D");
+        page.givenAtAll(aTask(ACTIVE, "E"));
+
+
+        page.clearCompleted();
+        page.assertVisibleTasks("E");
+        page.assertItemsLeft(1);
+
+    }
+
+    @Test
     public void testEditByClickOutsideAtAll() {
 
         page.givenAtAll(aTask(ACTIVE, "A"));
-        page.assertTasks("A");
 
         page.startEdit("A", "A edited");
-        $("#header").click();
+        $("#new-todo").click();
         page.assertTasks("A edited");
+        page.assertItemsLeft(1);
+    }
+
+    @Test
+    public void testMoveFromAllToActive() {
+        page.givenAtAll(aTask(ACTIVE, "A"), aTask(COMPLETED, "B"));
+
+        page.filterActive();
+        page.assertVisibleTasks("A");
+        page.assertItemsLeft(1);
+    }
+
+    @Test
+    public void testEditAtActive() {
+
+        page.givenAtActive(aTask(ACTIVE, "A"), aTask(ACTIVE, "B"));
+
+        page.startEdit("B", "B edited").pressEnter();
+        page.assertTasks("A", "B edited");
+        page.assertItemsLeft(2);
+    }
+
+    @Test
+    public void testDeleteAtActive() {
+
+        page.givenAtActive(aTask(ACTIVE, "A"));
+
+        page.delete("A");
+        page.assertNoTasks();
+    }
+
+    @Test
+    public void testCompleteAtActive() {
+
+        page.givenAtActive(aTask(ACTIVE, "A"));
+
+        page.toggle("A");
+        page.assertNoVisibleTasks();
+        page.assertItemsLeft(0);
+    }
+
+    @Test
+    public void testClearCompletedAtActive() {
+
+        page.givenAtActive(aTask(COMPLETED, "A"));
+
+        page.assertItemsLeft(0);
+        page.clearCompleted();
+    }
+
+    @Test
+    public void testCancelEditByEscAtActive() {
+
+        page.givenAtActive(aTask(ACTIVE, "A"));
+
+        page.startEdit("A", "A edited").pressEscape();
+        page.assertTasks("A");
         page.assertItemsLeft(1);
     }
 
@@ -63,20 +164,40 @@ public class TodoMVCTest extends BaseTest {
     public void testEditByPressTabAtActive() {
 
         page.givenAtActive(aTask(ACTIVE, "A"));
-        page.assertVisibleTasks("A");
 
+        page.assertVisibleTasks("A");
         page.startEdit("A", "A edited").pressTab();
         page.assertVisibleTasks("A edited");
         page.assertItemsLeft(1);
     }
 
     @Test
-    public void testDeleteByRemovingTaskNameAtCompleted() {
+    public void testMoveFromActiveToCompleted() {
+
+        page.givenAtActive(aTask(ACTIVE, "A"), aTask(COMPLETED, "B"));
+
+        page.filterCompleted();
+        page.assertVisibleTasks("B");
+        page.assertItemsLeft(1);
+    }
+
+    @Test
+    public void testEditAtCompleted() {
 
         page.givenAtCompleted(aTask(COMPLETED, "A"));
-        page.assertVisibleTasks("A");
 
-        page.startEdit("A", "").pressEnter();
+        page.startEdit("A", "A edited").pressEnter();
+        page.assertTasks("A edited");
+        page.assertItemsLeft(0);
+    }
+
+    @Test
+    public void testDeleteAtCompleted() {
+
+        page.givenAtCompleted(aTask(COMPLETED, "A"), aTask(ACTIVE, "B"));
+
+        page.assertItemsLeft(1);
+        page.delete("A");
         page.assertNoVisibleTasks();
     }
 
@@ -84,13 +205,39 @@ public class TodoMVCTest extends BaseTest {
     public void testReopenAllTaskAtCompleted() {
 
         page.givenAtCompleted(COMPLETED, "A", "B", "C");
-        page.toggleAll();
-        page.filterCompleted();
-        page.assertVisibleTasks("A", "B", "C");
 
+        page.assertVisibleTasks("A", "B", "C");
         page.toggleAll();
         page.assertNoVisibleTasks();
         page.assertItemsLeft(3);
     }
 
+    @Test
+    public void testCancelEditByEscAtCompleted() {
+
+        page.givenAtCompleted(aTask(ACTIVE, "A"), aTask(COMPLETED, "B"));
+
+        page.startEdit("B", "B edited").pressEscape();
+        page.assertVisibleTasks("B");
+        page.assertItemsLeft(1);
+    }
+
+    @Test
+    public void testDeleteByRemovingTextAtCompleted() {
+
+        page.givenAtCompleted(aTask(COMPLETED, "A"));
+
+        page.assertVisibleTasks("A");
+        page.startEdit("A", "").pressEnter();
+        page.assertNoVisibleTasks();
+    }
+
+    @Test
+    public void testMoveFromCompletedToAll() {
+        page.givenAtCompleted(aTask(COMPLETED, "A"), aTask(ACTIVE, "B"));
+
+        page.filterAll();
+        page.assertTasks("A", "B");
+        page.assertItemsLeft(1);
+    }
 }

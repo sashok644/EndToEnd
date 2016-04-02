@@ -12,7 +12,6 @@ import static qa.test.pageobjects_and_modules.pagemodules.pages.TodoMVC.*;
  */
 public class TodoMVCTest extends BaseTest {
 
-
     @Test
     public void testTaskMainFlow() {
 

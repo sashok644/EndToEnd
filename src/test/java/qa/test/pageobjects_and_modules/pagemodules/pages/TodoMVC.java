@@ -19,6 +19,7 @@ import static qa.test.pageobjects_and_modules.pagemodules.pages.TodoMVC.TaskType
  * Created by 64 on 31.03.2016.
  */
 public class TodoMVC {
+
     public static ElementsCollection tasks = $$("#todo-list>li");
 
     public enum TaskType {
@@ -27,9 +28,9 @@ public class TodoMVC {
 
     public enum Filter {
 
-        ALL("http://todomvc4tasj.herokuapp.com/#/"),
-        ACTIVE("http://todomvc4tasj.herokuapp.com/#/active"),
-        COMPLETED("http://todomvc4tasj.herokuapp.com/#/completed");
+        ALL(""),
+        ACTIVE("active"),
+        COMPLETED("completed");
 
         private String url;
 
@@ -38,11 +39,10 @@ public class TodoMVC {
         }
 
         public String getURL() {
-            return url;
+            return "http://todomvc4tasj.herokuapp.com/#/" + url;
         }
 
     }
-
 
     public static class Task {
         TaskType taskType;
@@ -60,13 +60,12 @@ public class TodoMVC {
         return task;
     }
 
-    public static void ensurePageOpened(Filter filter) {
+    public static void getTaskArray(Filter filter, Task... tasks) {
+
         if (!url().equals(filter.getURL())) {
             open(filter.getURL());
         }
-    }
 
-    public static void given(Task... tasks) {
         String result = "";
 
         for (Task task : tasks) {
@@ -85,53 +84,39 @@ public class TodoMVC {
 
     }
 
-    public static void given(TaskType taskType, String... taskText) {
+    public static Task[] getTaskArray(TaskType taskType, String... taskTexts) {
 
-        String result = "";
-
-        for (int i = 0; i < taskText.length; i++) {
-            result = result + "{\\\"completed\\\":" + (taskType == ACTIVE ? "false" : "true") + ", \\\"title\\\":\\\"" + taskText[i] + "\\\"},";
+        Task[] tasks = new Task[taskTexts.length];
+        for (int i = 0; i < taskTexts.length; i++) {
+            tasks[i] = aTask(taskType, taskTexts[i]);
         }
-        if (taskText.length > 0) {
-            result = result.substring(0, result.length() - 1);
-        }
-        String JS = "localStorage.setItem(\"todos-troopjs\", \"[" + result + "]\")";
-
-        executeJavaScript(JS);
-        executeJavaScript("location.reload()");
+        return (tasks);
     }
 
     public static void givenAtAll(Task... tasks) {
-        ensurePageOpened(Filter.ALL);
-        given(tasks);
+        getTaskArray(Filter.ALL, tasks);
     }
 
     public static void givenAtActive(Task... tasks) {
-        ensurePageOpened(Filter.ACTIVE);
-        given(tasks);
+        getTaskArray(Filter.ACTIVE, tasks);
     }
 
     public static void givenAtCompleted(Task... tasks) {
-        ensurePageOpened(Filter.COMPLETED);
-        given(tasks);
+        getTaskArray(Filter.COMPLETED, tasks);
     }
 
-
     public static void givenAtAll(TaskType taskType, String... taskTexts) {
-        ensurePageOpened(Filter.ALL);
-        given(taskType, taskTexts);
+        getTaskArray(Filter.ALL, getTaskArray(taskType, taskTexts));
 
     }
 
     public static void givenAtActive(TaskType taskType, String... taskTexts) {
-        ensurePageOpened(Filter.ACTIVE);
-        given(taskType, taskTexts);
+        getTaskArray(Filter.ACTIVE, getTaskArray(taskType, taskTexts));
 
     }
 
     public static void givenAtCompleted(TaskType taskType, String... taskTexts) {
-        ensurePageOpened(Filter.COMPLETED);
-        given(taskType, taskTexts);
+        getTaskArray(Filter.COMPLETED, getTaskArray(taskType, taskTexts));
 
     }
 
@@ -208,6 +193,7 @@ public class TodoMVC {
     public static void assertNoVisibleTasks() {
         tasks.filter(visible).shouldBe(empty);
     }
+
 }
 
 
