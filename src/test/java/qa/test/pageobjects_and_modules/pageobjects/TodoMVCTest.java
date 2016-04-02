@@ -4,10 +4,9 @@ import org.junit.Test;
 import qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage;
 
 import static com.codeborne.selenide.Selenide.$;
-import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.Task.*;
-import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.TaskType.*;
-
-
+import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.TaskType.ACTIVE;
+import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.TaskType.COMPLETED;
+import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.aTask;
 
 
 /**

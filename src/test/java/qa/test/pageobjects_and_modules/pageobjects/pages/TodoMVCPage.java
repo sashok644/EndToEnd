@@ -10,7 +10,7 @@ import static com.codeborne.selenide.CollectionCondition.exactTexts;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.WebDriverRunner.url;
-import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.TaskType.*;
+import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.TaskType.ACTIVE;
 
 /**
  * Created by 64 on 31.03.2016.
@@ -41,7 +41,7 @@ public class TodoMVCPage {
 
     }
 
-    public class Task {
+    public static class Task {
         TaskType taskType;
         String taskText;
 
@@ -52,7 +52,7 @@ public class TodoMVCPage {
         }
     }
 
-    public Task aTask(TaskType taskType, String taskText) {
+    public static Task aTask(TaskType taskType, String taskText) {
         Task task = new Task(taskType, taskText);
         return task;
     }
