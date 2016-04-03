@@ -3,7 +3,6 @@ package qa.test.pageobjects_and_modules.pageobjects;
 import org.junit.Test;
 import qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage;
 
-import static com.codeborne.selenide.Selenide.$;
 import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.TaskType.ACTIVE;
 import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.TaskType.COMPLETED;
 import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.aTask;
@@ -49,8 +48,13 @@ public class TodoMVCTest extends BaseTest {
         page.assertNoTasks();
     }
 
+    /*******************************
+     * **********All filter***********
+     *******************************/
+
     @Test
     public void testCompleteAllAtAll() {
+
         page.givenAtAll(ACTIVE, "A", "B", "C", "D");
 
         page.toggleAll();
@@ -81,12 +85,11 @@ public class TodoMVCTest extends BaseTest {
     @Test
     public void testClearCompletedAtAll() {
 
-        page.givenAtAll(COMPLETED, "A", "B", "C", "D");
-        page.givenAtAll(aTask(ACTIVE, "E"));
+        page.givenAtAll(aTask(COMPLETED, "A"), aTask(COMPLETED, "B"), aTask(ACTIVE, "C"));
 
 
         page.clearCompleted();
-        page.assertVisibleTasks("E");
+        page.assertVisibleTasks("C");
         page.assertItemsLeft(1);
 
     }
@@ -97,19 +100,23 @@ public class TodoMVCTest extends BaseTest {
         page.givenAtAll(aTask(ACTIVE, "A"));
 
         page.startEdit("A", "A edited");
-        $("#new-todo").click();
+        page.newTask.click();
         page.assertTasks("A edited");
         page.assertItemsLeft(1);
     }
 
     @Test
-    public void testMoveFromAllToActive() {
+    public void testMoveFromAllToCompleted() {
         page.givenAtAll(aTask(ACTIVE, "A"), aTask(COMPLETED, "B"));
 
-        page.filterActive();
-        page.assertVisibleTasks("A");
+        page.filterCompleted();
+        page.assertVisibleTasks("B");
         page.assertItemsLeft(1);
     }
+
+    /******************************
+     * ********Active filter*********
+     ******************************/
 
     @Test
     public void testEditAtActive() {
@@ -145,8 +152,8 @@ public class TodoMVCTest extends BaseTest {
 
         page.givenAtActive(aTask(COMPLETED, "A"));
 
-        page.assertItemsLeft(0);
         page.clearCompleted();
+        page.assertNoTasks();
     }
 
     @Test
@@ -171,14 +178,18 @@ public class TodoMVCTest extends BaseTest {
     }
 
     @Test
-    public void testMoveFromActiveToCompleted() {
+    public void testMoveFromActiveToAll() {
 
         page.givenAtActive(aTask(ACTIVE, "A"), aTask(COMPLETED, "B"));
 
-        page.filterCompleted();
-        page.assertVisibleTasks("B");
+        page.filterAll();
+        page.assertVisibleTasks("A", "B");
         page.assertItemsLeft(1);
     }
+
+    /******************************
+     ********Completed filter*******
+     ******************************/
 
     @Test
     public void testEditAtCompleted() {
@@ -195,9 +206,9 @@ public class TodoMVCTest extends BaseTest {
 
         page.givenAtCompleted(aTask(COMPLETED, "A"), aTask(ACTIVE, "B"));
 
-        page.assertItemsLeft(1);
         page.delete("A");
         page.assertNoVisibleTasks();
+        page.assertItemsLeft(1);
     }
 
     @Test
@@ -205,7 +216,6 @@ public class TodoMVCTest extends BaseTest {
 
         page.givenAtCompleted(COMPLETED, "A", "B", "C");
 
-        page.assertVisibleTasks("A", "B", "C");
         page.toggleAll();
         page.assertNoVisibleTasks();
         page.assertItemsLeft(3);
@@ -226,17 +236,20 @@ public class TodoMVCTest extends BaseTest {
 
         page.givenAtCompleted(aTask(COMPLETED, "A"));
 
-        page.assertVisibleTasks("A");
         page.startEdit("A", "").pressEnter();
         page.assertNoVisibleTasks();
     }
 
     @Test
-    public void testMoveFromCompletedToAll() {
+    public void testMoveFromCompletedToActive() {
+
         page.givenAtCompleted(aTask(COMPLETED, "A"), aTask(ACTIVE, "B"));
 
-        page.filterAll();
-        page.assertTasks("A", "B");
+        page.filterActive();
+        page.assertTasks("B");
         page.assertItemsLeft(1);
     }
 }
+
+
+

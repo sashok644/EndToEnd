@@ -18,6 +18,11 @@ import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.Task
 public class TodoMVCPage {
 
     public ElementsCollection tasks = $$("#todo-list>li");
+    public SelenideElement newTask = $("#new-todo");
+
+    /*****************************
+     * ***********Given*************
+     *****************************/
 
     public enum TaskType {
         ACTIVE, COMPLETED
@@ -57,7 +62,7 @@ public class TodoMVCPage {
         return task;
     }
 
-    public void getTaskArray(Filter filter, Task... tasks) {
+    public void given(Filter filter, Task... tasks) {
 
         if (!url().equals(filter.getURL())) {
             open(filter.getURL());
@@ -91,29 +96,29 @@ public class TodoMVCPage {
     }
 
     public void givenAtAll(Task... tasks) {
-        getTaskArray(Filter.ALL, tasks);
+        given(Filter.ALL, tasks);
     }
 
     public void givenAtActive(Task... tasks) {
-        getTaskArray(Filter.ACTIVE, tasks);
+        given(Filter.ACTIVE, tasks);
     }
 
     public void givenAtCompleted(Task... tasks) {
-        getTaskArray(Filter.COMPLETED, tasks);
+        given(Filter.COMPLETED, tasks);
     }
 
     public void givenAtAll(TaskType taskType, String... taskTexts) {
-        getTaskArray(Filter.ALL, getTaskArray(taskType, taskTexts));
+        given(Filter.ALL, getTaskArray(taskType, taskTexts));
 
     }
 
     public void givenAtActive(TaskType taskType, String... taskTexts) {
-        getTaskArray(Filter.ACTIVE, getTaskArray(taskType, taskTexts));
+        given(Filter.ACTIVE, getTaskArray(taskType, taskTexts));
 
     }
 
     public void givenAtCompleted(TaskType taskType, String... taskTexts) {
-        getTaskArray(Filter.COMPLETED, getTaskArray(taskType, taskTexts));
+        given(Filter.COMPLETED, getTaskArray(taskType, taskTexts));
 
     }
 
@@ -167,7 +172,7 @@ public class TodoMVCPage {
     @Step
     public void add(String... taskTexts) {
         for (String text : taskTexts) {
-            $("#new-todo").setValue(text).pressEnter();
+            newTask.setValue(text).pressEnter();
         }
     }
 
