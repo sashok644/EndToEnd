@@ -1,4 +1,4 @@
-package qa.test.pageobjects_and_modules;
+package full_coverage;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
@@ -11,8 +11,8 @@ import static com.codeborne.selenide.CollectionCondition.exactTexts;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.WebDriverRunner.url;
-import static qa.test.pageobjects_and_modules.TodoMVCTest.TaskType.ACTIVE;
-import static qa.test.pageobjects_and_modules.TodoMVCTest.TaskType.COMPLETED;
+import static full_coverage.TodoMVCTest.TaskType.ACTIVE;
+import static full_coverage.TodoMVCTest.TaskType.COMPLETED;
 
 /**
  * Created by 64 on 24.02.2016.

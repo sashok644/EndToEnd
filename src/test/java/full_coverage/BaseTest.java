@@ -1,4 +1,4 @@
-package qa.test.pageobjects_and_modules;
+package full_coverage;
 
 import com.codeborne.selenide.Screenshots;
 import com.google.common.io.Files;
