@@ -17,7 +17,7 @@ import static qa.test.pageobjects_and_modules.pageobjects.pages.TodoMVCPage.Task
  */
 public class TodoMVCPage {
 
-    public ElementsCollection tasks = $$("#todo-list>li");
+    private ElementsCollection tasks = $$("#todo-list>li");
     public SelenideElement newTask = $("#new-todo");
 
     /*****************************
