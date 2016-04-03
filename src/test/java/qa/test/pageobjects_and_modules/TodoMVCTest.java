@@ -52,6 +52,10 @@ public class TodoMVCTest extends BaseTest {
         assertNoTasks();
     }
 
+    /*******************************
+     * **********All filter***********
+     *******************************/
+
     @Test
     public void testCompleteAllAtAll() {
         givenAtAll(ACTIVE, "A", "B", "C", "D");
@@ -84,12 +88,11 @@ public class TodoMVCTest extends BaseTest {
     @Test
     public void testClearCompletedAtAll() {
 
-        givenAtAll(COMPLETED, "A", "B", "C", "D");
-        givenAtAll(aTask(ACTIVE, "E"));
+        givenAtAll(aTask(COMPLETED, "A"), aTask(COMPLETED, "B"), aTask(ACTIVE, "C"));
 
 
         clearCompleted();
-        assertVisibleTasks("E");
+        assertVisibleTasks("C");
         assertItemsLeft(1);
 
     }
@@ -100,19 +103,23 @@ public class TodoMVCTest extends BaseTest {
         givenAtAll(aTask(ACTIVE, "A"));
 
         startEdit("A", "A edited");
-        $("#new-todo").click();
+        newTask.click();
         assertTasks("A edited");
         assertItemsLeft(1);
     }
 
     @Test
-    public void testMoveFromAllToActive() {
+    public void testMoveFromAllToCompleted() {
         givenAtAll(aTask(ACTIVE, "A"), aTask(COMPLETED, "B"));
 
-        filterActive();
-        assertVisibleTasks("A");
+        filterCompleted();
+        assertVisibleTasks("B");
         assertItemsLeft(1);
     }
+
+    /******************************
+     *********Active filter*********
+     ******************************/
 
     @Test
     public void testEditAtActive() {
@@ -148,8 +155,8 @@ public class TodoMVCTest extends BaseTest {
 
         givenAtActive(aTask(COMPLETED, "A"));
 
-        assertItemsLeft(0);
         clearCompleted();
+        assertNoTasks();
     }
 
     @Test
@@ -174,14 +181,18 @@ public class TodoMVCTest extends BaseTest {
     }
 
     @Test
-    public void testMoveFromActiveToCompleted() {
+    public void testMoveFromActiveToAll() {
 
         givenAtActive(aTask(ACTIVE, "A"), aTask(COMPLETED, "B"));
 
-        filterCompleted();
-        assertVisibleTasks("B");
+        filterAll();
+        assertVisibleTasks("A", "B");
         assertItemsLeft(1);
     }
+
+    /******************************
+     ********Completed filter*******
+     ******************************/
 
     @Test
     public void testEditAtCompleted() {
@@ -198,9 +209,9 @@ public class TodoMVCTest extends BaseTest {
 
         givenAtCompleted(aTask(COMPLETED, "A"), aTask(ACTIVE, "B"));
 
-        assertItemsLeft(1);
         delete("A");
         assertNoVisibleTasks();
+        assertItemsLeft(1);
     }
 
     @Test
@@ -208,7 +219,6 @@ public class TodoMVCTest extends BaseTest {
 
         givenAtCompleted(COMPLETED, "A", "B", "C");
 
-        assertVisibleTasks("A", "B", "C");
         toggleAll();
         assertNoVisibleTasks();
         assertItemsLeft(3);
@@ -229,120 +239,25 @@ public class TodoMVCTest extends BaseTest {
 
         givenAtCompleted(aTask(COMPLETED, "A"));
 
-        assertVisibleTasks("A");
         startEdit("A", "").pressEnter();
         assertNoVisibleTasks();
     }
 
     @Test
-    public void testMoveFromCompletedToAll() {
+    public void testMoveFromCompletedToActive() {
         givenAtCompleted(aTask(COMPLETED, "A"), aTask(ACTIVE, "B"));
 
-        filterAll();
-        assertTasks("A", "B");
+        filterActive();
+        assertTasks("B");
         assertItemsLeft(1);
     }
 
+    /*****************************
+     ************Steps*************
+     *****************************/
 
     private ElementsCollection tasks = $$("#todo-list>li");
-
-    public enum TaskType {
-        ACTIVE, COMPLETED
-    }
-
-    public enum Filter {
-
-        ALL(""),
-        ACTIVE("active"),
-        COMPLETED("completed");
-
-        private String url;
-
-        Filter(String url) {
-            this.url = url;
-        }
-
-        public String getURL() {
-            return "http://todomvc4tasj.herokuapp.com/#/" + url;
-        }
-
-    }
-
-    private class Task {
-        TaskType taskType;
-        String taskText;
-
-
-        public Task(TaskType taskType, String taskText) {
-            this.taskType = taskType;
-            this.taskText = taskText;
-        }
-    }
-
-    private Task aTask(TaskType taskType, String taskText) {
-        Task task = new Task(taskType, taskText);
-        return task;
-    }
-
-    private void getTaskArray(Filter filter, Task... tasks) {
-
-        if (!url().equals(filter.getURL())) {
-            open(filter.getURL());
-        }
-
-        String result = "";
-
-        for (Task task : tasks) {
-            result = result + "{\\\"completed\\\":" + (task.taskType == ACTIVE ? "false" : "true") +
-                    ", \\\"title\\\":\\\"" + task.taskText + "\\\"},";
-
-        }
-        if (tasks.length > 0) {
-            result = result.substring(0, result.length() - 1);
-        }
-
-        String JS = "localStorage.setItem(\"todos-troopjs\", \"[" + result + "]\")";
-
-        executeJavaScript(JS);
-        executeJavaScript("location.reload()");
-
-    }
-
-    private Task[] getTaskArray(TaskType taskType, String... taskTexts) {
-
-        Task[] tasks = new Task[taskTexts.length];
-        for (int i = 0; i < taskTexts.length; i++) {
-            tasks[i] = aTask(taskType, taskTexts[i]);
-        }
-        return (tasks);
-    }
-
-    private void givenAtAll(Task... tasks) {
-        getTaskArray(Filter.ALL, tasks);
-    }
-
-    private void givenAtActive(Task... tasks) {
-        getTaskArray(Filter.ACTIVE, tasks);
-    }
-
-    private void givenAtCompleted(Task... tasks) {
-        getTaskArray(Filter.COMPLETED, tasks);
-    }
-
-    private void givenAtAll(TaskType taskType, String... taskTexts) {
-        getTaskArray(Filter.ALL, getTaskArray(taskType, taskTexts));
-
-    }
-
-    private void givenAtActive(TaskType taskType, String... taskTexts) {
-        getTaskArray(Filter.ACTIVE, getTaskArray(taskType, taskTexts));
-
-    }
-
-    private void givenAtCompleted(TaskType taskType, String... taskTexts) {
-        getTaskArray(Filter.COMPLETED, getTaskArray(taskType, taskTexts));
-
-    }
+    private SelenideElement newTask = $("#new-todo");
 
     @Step
     private void assertItemsLeft(Integer count) {
@@ -394,7 +309,7 @@ public class TodoMVCTest extends BaseTest {
     @Step
     private void add(String... taskTexts) {
         for (String text : taskTexts) {
-            $("#new-todo").setValue(text).pressEnter();
+            newTask.setValue(text).pressEnter();
         }
     }
 
@@ -416,6 +331,108 @@ public class TodoMVCTest extends BaseTest {
     @Step
     private void assertNoVisibleTasks() {
         tasks.filter(visible).shouldBe(empty);
+    }
+
+    /*****************************
+     ************Given*************
+     *****************************/
+
+    public enum TaskType {
+        ACTIVE, COMPLETED
+    }
+
+    public enum Filter {
+
+        ALL(""),
+        ACTIVE("active"),
+        COMPLETED("completed");
+
+        private String url;
+
+        Filter(String url) {
+            this.url = url;
+        }
+
+        public String getURL() {
+            return "http://todomvc4tasj.herokuapp.com/#/" + url;
+        }
+
+    }
+
+    private class Task {
+        TaskType taskType;
+        String taskText;
+
+
+        public Task(TaskType taskType, String taskText) {
+            this.taskType = taskType;
+            this.taskText = taskText;
+        }
+    }
+
+    private Task aTask(TaskType taskType, String taskText) {
+        Task task = new Task(taskType, taskText);
+        return task;
+    }
+
+    private void given(Filter filter, Task... tasks) {
+
+        if (!url().equals(filter.getURL())) {
+            open(filter.getURL());
+        }
+
+        String result = "";
+
+        for (Task task : tasks) {
+            result = result + "{\\\"completed\\\":" + (task.taskType == ACTIVE ? "false" : "true") +
+                    ", \\\"title\\\":\\\"" + task.taskText + "\\\"},";
+
+        }
+        if (tasks.length > 0) {
+            result = result.substring(0, result.length() - 1);
+        }
+
+        String JS = "localStorage.setItem(\"todos-troopjs\", \"[" + result + "]\")";
+
+        executeJavaScript(JS);
+        executeJavaScript("location.reload()");
+
+    }
+
+    private Task[] getTaskArray(TaskType taskType, String... taskTexts) {
+
+        Task[] tasks = new Task[taskTexts.length];
+        for (int i = 0; i < taskTexts.length; i++) {
+            tasks[i] = aTask(taskType, taskTexts[i]);
+        }
+        return (tasks);
+    }
+
+    private void givenAtAll(Task... tasks) {
+        given(Filter.ALL, tasks);
+    }
+
+    private void givenAtActive(Task... tasks) {
+        given(Filter.ACTIVE, tasks);
+    }
+
+    private void givenAtCompleted(Task... tasks) {
+        given(Filter.COMPLETED, tasks);
+    }
+
+    private void givenAtAll(TaskType taskType, String... taskTexts) {
+        given(Filter.ALL, getTaskArray(taskType, taskTexts));
+
+    }
+
+    private void givenAtActive(TaskType taskType, String... taskTexts) {
+        given(Filter.ACTIVE, getTaskArray(taskType, taskTexts));
+
+    }
+
+    private void givenAtCompleted(TaskType taskType, String... taskTexts) {
+        given(Filter.COMPLETED, getTaskArray(taskType, taskTexts));
+
     }
 }
 
