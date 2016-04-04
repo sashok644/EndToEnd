@@ -19,6 +19,7 @@ import static full_coverage.TodoMVCTest.TaskType.COMPLETED;
  */
 public class TodoMVCTest extends BaseTest {
 
+    @Test
     public void testTaskMainFlow() {
 
         givenAtAll();
@@ -174,7 +175,6 @@ public class TodoMVCTest extends BaseTest {
 
         givenAtActive(aTask(ACTIVE, "A"));
 
-        assertVisibleTasks("A");
         startEdit("A", "A edited").pressTab();
         assertVisibleTasks("A edited");
         assertItemsLeft(1);

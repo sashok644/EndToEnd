@@ -167,7 +167,6 @@ public class TodoMVCTest extends BaseTest {
 
         givenAtActive(aTask(ACTIVE, "A"));
 
-        assertVisibleTasks("A");
         startEdit("A", "A edited").pressTab();
         assertVisibleTasks("A edited");
         assertItemsLeft(1);
